@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MoveThing.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">gremlins_scaffold</a> &gt; <a href="index.source.html" class="el_package">gremlins.entity</a> &gt; <span class="el_source">MoveThing.java</span></div><h1>MoveThing.java</h1><pre class="source lang-java linenums">package gremlins.entity;
+
+import gremlins.App;
+
+import java.awt.*;
+
+/**
+ * 娓告垙瑙嗗浘涓墍鏈夊彲浠ョЩ鍔ㄧ墿浣撶殑鐖剁被
+ */
+public abstract class MoveThing implements Resetable{
+
+    /**
+     * 鏍囪褰撳墠鐗╀綋鏄惁浠庤鍥句腑鍒犻櫎
+     */
+<span class="fc" id="L15">    private boolean markForDelete = false;</span>
+
+    /**
+     * 褰撳墠鐨勭Щ鍔ㄦ柟鍚�
+     */
+    protected int direction;
+
+    /**
+     * 鐗╀綋绉诲姩閫熷害
+     */
+    protected int speed;
+
+    /**
+     * 鐗╀綋褰撳墠妯潗鏍�
+     */
+    protected int x;
+
+    /**
+     * 鐗╀綋褰撳墠绾靛潗鏍�
+     */
+    protected int y;
+
+    /**
+     * 鐗╀綋鍒濆妯潗鏍�
+     */
+    protected int initX;
+
+    /**
+     * 鐗╀綋鍒濆绾靛潗鏍�
+     */
+    protected int initY;
+
+    /**
+     * 璁板綍涓婃瀛愬脊鍙戝皠鏃堕棿锛堝鏋滃彲浠ュ彂灏勭殑璇濓級
+     */
+    protected long shootTime;
+
+    /**
+     * 鏋勯�犲嚱鏁�
+     *
+     * @param speed 鐗╀綋绉诲姩閫熷害
+     * @param x 鍒濆 x 鍧愭爣
+     * @param y 鍒濆 y 鍧愭爣
+     */
+<span class="fc" id="L59">    public MoveThing(int speed, int x, int y) {</span>
+<span class="fc" id="L60">        this.speed = speed;</span>
+<span class="fc" id="L61">        this.x = x;</span>
+<span class="fc" id="L62">        this.y = y;</span>
+<span class="fc" id="L63">        this.initX = x;</span>
+<span class="fc" id="L64">        this.initY = y;</span>
+<span class="fc" id="L65">    }</span>
+
+    /**
+     * 鑾峰彇褰撳墠 x 鍧愭爣
+     *
+     * @return 褰撳墠 x 鍧愭爣
+     */
+    public int getX() {
+<span class="fc" id="L73">        return x;</span>
+    }
+
+    /**
+     * 鑾峰彇褰撳墠 y 鍧愭爣
+     *
+     * @return 褰撳墠 y 鍧愭爣
+     */
+    public int getY() {
+<span class="fc" id="L82">        return y;</span>
+    }
+
+    /**
+     * 鏇存柊褰撳墠绉诲姩鐫�闈㈠悜鐨勬柟鍚�
+     *
+     * @param direction 寰呮洿鏂扮殑鏂瑰悜 0 --- up锛� 1-- down锛� 2 -- left锛� 3 -- right
+     */
+    public void updateDirection(int direction) {
+<span class="fc" id="L91">        this.direction = direction;</span>
+<span class="fc" id="L92">    }</span>
+
+    /**
+     * 鑾峰彇褰撳墠绉诲姩鐨勬柟鍚�
+     *
+     * @return 0 --- up锛� 1-- down锛� 2 -- left锛� 3 -- right
+     */
+    public int getDirection() {
+<span class="fc" id="L100">        return direction;</span>
+    }
+
+    /**
+     * 鏇存柊褰撳墠鐨勭Щ鍔ㄩ�熷害
+     *
+     * @param speed 寰呮洿鏂扮殑閫熷害
+     */
+    public void setSpeed(int speed) {
+<span class="fc" id="L109">        this.speed = speed;</span>
+<span class="fc" id="L110">    }</span>
+
+    /**
+     * 鐗╀綋绉诲姩锛屼笉鍚岀殑瀹炵幇绫婚�昏緫涓嶅悓
+     *
+     * @param map 褰撳墠鍏冲崱鍦板浘
+     */
+    public void move(Tile[][] map){
+
+<span class="nc" id="L119">    }</span>
+
+    /**
+     * 鐗╀綋鍚戝乏绉诲姩
+     *
+     * @param map 褰撳墠鍏冲崱鍦板浘
+     * @return true 鍙互鎴愬姛绉诲姩锛� false 涓嶅彲绉诲姩锛堟挒鍒板澹佺瓑鎯呭喌锛�
+     */
+    public boolean left(Tile[][] map) {
+<span class="fc" id="L128">        int newX = this.x - speed;</span>
+<span class="fc" id="L129">        Tile upTile = map[y / App.PIXEL][newX / App.PIXEL];</span>
+<span class="fc" id="L130">        Tile downTile = map[(y + App.PIXEL - 1) / App.PIXEL][newX / App.PIXEL];</span>
+<span class="pc bpc" id="L131" title="3 of 4 branches missed.">        if (upTile.moveTo() &amp;&amp; downTile.moveTo()) {</span>
+<span class="nc" id="L132">            updateCharacter(map);</span>
+<span class="nc" id="L133">            this.x = this.x - speed;</span>
+<span class="nc" id="L134">            return true;</span>
+        }
+<span class="fc" id="L136">        return false;</span>
+    }
+
+    /**
+     * 鐗╀綋鍚戝彸绉诲姩
+     *
+     * @param map 褰撳墠鍏冲崱鍦板浘
+     * @return true 鍙互鎴愬姛绉诲姩锛� false 涓嶅彲绉诲姩锛堟挒鍒板澹佺瓑鎯呭喌锛�
+     */
+    public boolean right(Tile[][] map) {
+<span class="fc" id="L146">        int newX = this.x + App.PIXEL + 1;</span>
+<span class="fc" id="L147">        Tile upTile = map[y / App.PIXEL][newX / App.PIXEL];</span>
+<span class="fc" id="L148">        Tile downTile = map[(y + App.PIXEL - 1) / App.PIXEL][newX / App.PIXEL];</span>
+<span class="pc bpc" id="L149" title="1 of 4 branches missed.">        if (upTile.moveTo() &amp;&amp; downTile.moveTo()) {</span>
+<span class="fc" id="L150">            updateCharacter(map);</span>
+<span class="fc" id="L151">            this.x = this.x + speed;</span>
+<span class="fc" id="L152">            return true;</span>
+        } else {
+<span class="pc bpc" id="L154" title="1 of 2 branches missed.">            if (newX % App.PIXEL == 0) {</span>
+<span class="nc" id="L155">                updateCharacter(map);</span>
+<span class="nc" id="L156">                this.x = this.x + speed;</span>
+<span class="nc" id="L157">                return true;</span>
+            }
+        }
+<span class="fc" id="L160">        return false;</span>
+    }
+
+    /**
+     * 鐗╀綋鍚戜笂绉诲姩
+     *
+     * @param map 褰撳墠鍏冲崱鍦板浘
+     * @return true 鍙互鎴愬姛绉诲姩锛� false 涓嶅彲绉诲姩锛堟挒鍒板澹佺瓑鎯呭喌锛�
+     */
+    public boolean up(Tile[][] map) {
+<span class="fc" id="L170">        int newY = this.y - speed;</span>
+<span class="fc" id="L171">        Tile leftTile = map[newY / App.PIXEL][x / App.PIXEL];</span>
+<span class="fc" id="L172">        Tile rightTile = map[newY / App.PIXEL][(x + App.PIXEL - 1) / App.PIXEL];</span>
+<span class="pc bpc" id="L173" title="2 of 4 branches missed.">        if (leftTile.moveTo() &amp;&amp; rightTile.moveTo()) {</span>
+<span class="fc" id="L174">            updateCharacter(map);</span>
+<span class="fc" id="L175">            this.y = this.y - speed;</span>
+<span class="fc" id="L176">            return true;</span>
+        }
+<span class="nc" id="L178">        return false;</span>
+    }
+
+    /**
+     * 璁剧疆褰撳墠鐨勫皠鍑绘椂闂�
+     */
+    public void setShootTime() {
+<span class="fc" id="L185">        this.shootTime = System.currentTimeMillis();</span>
+<span class="fc" id="L186">    }</span>
+
+    /**
+     * 鑾峰彇涓婃灏勫嚮鐨勬椂闂�
+     *
+     * @return 涓婃灏勫嚮鐨勬椂闂存埑锛堝崟浣� ms锛�
+     */
+    public long getShootTime() {
+<span class="fc" id="L194">        return shootTime;</span>
+    }
+
+    /**
+     * 鐗╀綋鍚戜笅绉诲姩
+     *
+     * @param map 褰撳墠鍏冲崱鍦板浘
+     * @return true 鍙互鎴愬姛绉诲姩锛� false 涓嶅彲绉诲姩锛堟挒鍒板澹佺瓑鎯呭喌锛�
+     */
+    public boolean down(Tile[][] map) {
+<span class="fc" id="L204">        int newY = this.y + App.PIXEL + 1;</span>
+<span class="fc" id="L205">        Tile leftTile = map[newY / App.PIXEL][x / App.PIXEL];</span>
+<span class="fc" id="L206">        Tile rightTile = map[newY / App.PIXEL][(x + App.PIXEL - 1) / App.PIXEL];</span>
+<span class="pc bpc" id="L207" title="2 of 4 branches missed.">        if (leftTile.moveTo() &amp;&amp; rightTile.moveTo()) {</span>
+<span class="fc" id="L208">            updateCharacter(map);</span>
+<span class="fc" id="L209">            this.y = this.y + speed;</span>
+<span class="fc" id="L210">            return true;</span>
+        } else {
+<span class="nc bnc" id="L212" title="All 2 branches missed.">            if (newY % App.PIXEL == 0) {</span>
+<span class="nc" id="L213">                updateCharacter(map);</span>
+<span class="nc" id="L214">                this.y = this.y + speed;</span>
+<span class="nc" id="L215">                return true;</span>
+            }
+        }
+<span class="nc" id="L218">        return false;</span>
+    }
+
+    /**
+     * 鍙戝皠瀛愬脊锛屼笉鍚屽疄鐜扮被閫昏緫涓嶅悓
+     *
+     * @param coldTime 鍐峰嵈鏃堕棿
+     * @return 鍙戝皠鐢熸垚鐨勫瓙寮圭被
+     */
+    public MoveThing shoot(double coldTime) {
+<span class="nc" id="L228">        return null;</span>
+    }
+
+    /**
+     * 鏇存柊鍦板浘鍐呯殑瀛楃
+     *
+     * @param map 褰撳墠鍏冲崱鍦板浘
+     */
+    private void updateCharacter(Tile[][] map){
+<span class="fc" id="L237">        Tile tile = map[this.y / App.PIXEL][this.x / App.PIXEL];</span>
+<span class="pc bpc" id="L238" title="2 of 4 branches missed.">        if (tile.getCharacter() != 'E' &amp;&amp; tile.getCharacter() != 'F') {</span>
+<span class="fc" id="L239">            tile.setCharacter(' ');</span>
+        }
+<span class="fc" id="L241">    }</span>
+
+
+    /**
+     * 鏍囪褰撳墠鐗╀綋涓哄垹闄ょ姸鎬�
+     */
+    public void markForDelete() {
+<span class="nc" id="L248">        this.markForDelete = true;</span>
+<span class="nc" id="L249">    }</span>
+
+    /**
+     * 鍒ゆ柇褰撳墠鐗╀綋鏄惁涓哄垹闄ょ姸鎬�
+     *
+     * @return true 涓哄垹闄ょ姸鎬侊紝 false 鏈垹闄ょ姸鎬�
+     */
+    public boolean isMarkForDelete() {
+<span class="nc" id="L257">        return markForDelete;</span>
+    }
+
+    /**
+     * 鐗╀綋鏄惁瓒婄晫锛堢Щ鍒板湴鍥惧闈級
+     *
+     * @return true 绉诲埌鍦板浘澶栭潰锛� false 鍦ㄥ湴鍥惧唴
+     */
+    public boolean outOfBound(){
+<span class="nc bnc" id="L266" title="All 8 branches missed.">        return x &lt; - App.PIXEL || x &gt; App.WIDTH || y &lt; -App.PIXEL || y &gt;= App.HEIGHT;</span>
+    }
+
+    /**
+     * 褰撳墠鐗╀綋鏄惁鍜屽叾浠栫墿浣撳彂鐢熸挒鍑�
+     *
+     * @param another 鍏朵粬绉诲姩鐗╀綋
+     * @return true 鐩告挒锛� false 鏈浉鎾�
+     */
+    public boolean collideWith(MoveThing another) {
+<span class="nc" id="L276">        Rectangle r1 = new Rectangle(x, y, App.PIXEL, App.PIXEL);</span>
+<span class="nc" id="L277">        Rectangle r2 = new Rectangle(another.x, another.y, App.PIXEL, App.PIXEL);</span>
+<span class="nc" id="L278">        return r1.intersects(r2);</span>
+    }
+
+    /**
+     * 褰撳墠鐗╀綋鏄惁涓庣爾鍧楃浉鎾烇紙瀛愬脊鎾炲妫�娴嬶級
+     *
+     * @param another 鐮栧潡
+     * @return true 鐩告挒锛� false 鏈浉鎾�
+     */
+    public boolean collideWith(Tile another) {
+<span class="nc" id="L288">        Rectangle r1 = new Rectangle(x, y, App.PIXEL, App.PIXEL);</span>
+<span class="nc" id="L289">        Rectangle r2 = new Rectangle(another.getX() * App.PIXEL, another.getY() * App.PIXEL, App.PIXEL, App.PIXEL);</span>
+<span class="nc" id="L290">        return r1.intersects(r2);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

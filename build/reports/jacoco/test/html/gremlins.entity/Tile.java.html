@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Tile.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">gremlins_scaffold</a> &gt; <a href="index.source.html" class="el_package">gremlins.entity</a> &gt; <span class="el_source">Tile.java</span></div><h1>Tile.java</h1><pre class="source lang-java linenums">package gremlins.entity;
+
+// 璇ョ被浠ｈ〃鍦板浘鐨勪竴涓牸瀛�
+public class Tile {
+
+    /**
+     * 鍒濆瀛楃锛堢敱浜庝竴浜涢亾鍏锋垨鐮栧潡鍙兘浼氭秷澶憋紝娓告垙閲嶇疆鏃堕渶瑕侀噸鏂版樉绀烘秷澶辩殑閬撳叿锛屽洜姝ょ敤浜庤褰曡捣濮嬬殑閬撳叿锛�
+     */
+    private int initCharacter;
+
+    /**
+     * 褰撳墠瀛楃锛堥殢鐫�娓告垙鐨勮繘灞曪紝涓�浜涗綅缃殑閬撳叿鎴栫洰鏍囧彂鐢熷彉鍖栵級
+     */
+    private char character;
+
+    /**
+     * 妯潗鏍�
+     */
+    private int x;
+
+    /**
+     * 绾靛潗鏍�
+     */
+    private int y;
+
+    /**
+     * 鑷瓙寮瑰嚮涓粡杩囦簡澶氫箙
+     */
+<span class="fc" id="L29">    private int frame = -1;</span>
+
+    /**
+     * 鏋勯�犳柟娉�
+     *
+     * @param character 瀛楃
+     * @param x 妯潗鏍�
+     * @param y 绾靛潗鏍�
+     */
+<span class="fc" id="L38">    public Tile(char character, int x, int y) {</span>
+<span class="fc" id="L39">        this.character = character;</span>
+<span class="fc" id="L40">        this.initCharacter = character;</span>
+<span class="fc" id="L41">        this.x = x;</span>
+<span class="fc" id="L42">        this.y = y;</span>
+<span class="fc" id="L43">    }</span>
+
+    /**
+     * 褰撳墠鍧愭爣涓嬬殑甯э紝鐢ㄤ簬璁板綍鐮栧潡琚泦涓悗锛屾瘡闅� 4 甯ф樉绀轰笉鍚岀殑鍥剧墖锛屽洓涓浘鐗囨渶澶� 16 甯�
+     * 16 甯у畬鎴愬悗锛岀爾鍧楀畬鍏ㄦ秷澶憋紝闇�瑕佽缃綋鍓嶅瓧绗︿负 ' '
+     */
+    public void addFrame() {
+<span class="fc" id="L50">        this.frame ++;</span>
+<span class="pc bpc" id="L51" title="1 of 2 branches missed.">        if (this.frame &gt; 16) {</span>
+<span class="nc" id="L52">            setCharacter(' ');</span>
+<span class="nc" id="L53">            this.frame = -1;</span>
+        }
+<span class="fc" id="L55">    }</span>
+
+    /**
+     * 鑾峰彇褰撳墠璧拌繃鐨勫抚鏁�
+     *
+     * @return 褰撳墠甯ф暟
+     */
+    public int getFrame() {
+<span class="fc" id="L63">        return frame;</span>
+    }
+
+    /**
+     * 璁剧疆褰撳墠鐨勫瓧绗�
+     *
+     * @param character 浼犲叆鐨勫瓧绗�
+     */
+    public void setCharacter(char character) {
+<span class="fc" id="L72">        this.character = character;</span>
+<span class="fc" id="L73">    }</span>
+
+    /**
+     * 鑾峰彇褰撳墠瀛楃
+     *
+     * @return 褰撳墠浣嶇疆鐨勫瓧绗�
+     */
+    public char getCharacter() {
+<span class="fc" id="L81">        return character;</span>
+    }
+
+    /**
+     * 鑾峰彇褰撳墠鐨勬í鍧愭爣
+     *
+     * @return 妯潗鏍�
+     */
+    public int getX() {
+<span class="fc" id="L90">        return x;</span>
+    }
+
+
+    /**
+     * 鑾峰彇褰撳墠鐨勭旱鍧愭爣
+     *
+     * @return 绾靛潗鏍�
+     */
+    public int getY() {
+<span class="fc" id="L100">        return y;</span>
+    }
+
+    /**
+     * 褰撳墠浣嶇疆鏄惁鍙互绉诲姩
+     *
+     * @return true 浠ｈ〃鍙互绉诲姩锛� false 浠ｈ〃涓嶅彲浠ョЩ鍔�
+     */
+    public boolean moveTo() {
+<span class="pc bpc" id="L109" title="3 of 8 branches missed.">        return character == ' ' || character == 'E' || character == 'W' || character == 'F';</span>
+    }
+
+    /**
+     * 鑾峰彇鍒濆鐨勫瓧绗�
+     *
+     * @return 鍒濆瀛楃
+     */
+    public int getInitCharacter() {
+<span class="fc" id="L118">        return initCharacter;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

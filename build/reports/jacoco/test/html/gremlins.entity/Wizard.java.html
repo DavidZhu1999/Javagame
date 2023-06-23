@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Wizard.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">gremlins_scaffold</a> &gt; <a href="index.source.html" class="el_package">gremlins.entity</a> &gt; <span class="el_source">Wizard.java</span></div><h1>Wizard.java</h1><pre class="source lang-java linenums">package gremlins.entity;
+
+import gremlins.App;
+import processing.core.PImage;
+
+/**
+ * 鐜╁鎿嶇旱瑙掕壊绫�
+ */
+public class Wizard extends MoveThing{
+
+    /**
+     * 鐜╁鍥剧墖
+     */
+    private PImage image;
+
+    /**
+     * 鏋勯�犲嚱鏁�
+     *
+     * @param speed 鐜╁绉诲姩閫熷害
+     * @param x 鐜╁鍒濆妯潗鏍�
+     * @param y 鐜╁鍒濆绾靛潗鏍�
+     */
+    public Wizard(int speed, int x, int y) {
+<span class="fc" id="L24">        super(speed, x, y);</span>
+<span class="fc" id="L25">        this.direction = 3;</span>
+<span class="fc" id="L26">    }</span>
+
+    /**
+     * 璁剧疆鐜╁褰撳墠灞曠ず鐨勫浘鐗�
+     *
+     * @param image 鐜╁鍥剧墖
+     */
+    public void setImage(PImage image) {
+<span class="nc" id="L34">        this.image = image;</span>
+<span class="nc" id="L35">    }</span>
+
+    /**
+     * 鑾峰彇鐜╁褰撳墠灞曠ず鐨勫浘鐗�
+     *
+     * @return 鐜╁鍥剧墖
+     */
+    public PImage getImage() {
+<span class="nc" id="L43">        return image;</span>
+    }
+
+    /**
+     * 鐜╁鍙戝皠瀛愬脊
+     *
+     * @param coldTime 鍐峰嵈鏃堕棿
+     * @return 瀛愬脊瀹炰綋绫�
+     */
+    @Override
+    public Bullet shoot(double coldTime) {
+<span class="fc" id="L54">        long shootTime = getShootTime();</span>
+<span class="fc" id="L55">        long millis = System.currentTimeMillis();</span>
+<span class="fc" id="L56">        long diff = millis - shootTime;</span>
+<span class="pc bpc" id="L57" title="1 of 2 branches missed.">        if (diff * 0.001 &gt; coldTime) {</span>
+<span class="fc" id="L58">            setShootTime();</span>
+<span class="fc" id="L59">            int shootX = 0;</span>
+<span class="fc" id="L60">            int shootY = 0;</span>
+<span class="pc bpc" id="L61" title="1 of 2 branches missed.">            if (direction == 0) {</span>
+<span class="nc" id="L62">                shootX = getX();</span>
+<span class="nc" id="L63">                shootY = getY() - 4;</span>
+            }
+<span class="pc bpc" id="L65" title="1 of 2 branches missed.">            if (direction == 1) {</span>
+<span class="fc" id="L66">                shootX = getX();</span>
+<span class="fc" id="L67">                shootY = getY() + 4;</span>
+            }
+<span class="pc bpc" id="L69" title="1 of 2 branches missed.">            if (direction == 2) {</span>
+<span class="nc" id="L70">                shootX = getX() - 4;</span>
+<span class="nc" id="L71">                shootY = getY();</span>
+            }
+<span class="pc bpc" id="L73" title="1 of 2 branches missed.">            if (direction == 3) {</span>
+<span class="nc" id="L74">                shootX = getX() + 4;</span>
+<span class="nc" id="L75">                shootY = getY();</span>
+            }
+<span class="fc" id="L77">            FireBall fireBall = new FireBall(App.BULLET_SPEED, shootX, shootY);</span>
+<span class="fc" id="L78">            fireBall.direction = direction;</span>
+<span class="fc" id="L79">            return fireBall;</span>
+        }
+<span class="nc" id="L81">        return null;</span>
+    }
+
+    /**
+     * 閲嶇疆鐜╁淇℃伅銆傚皢鍏跺潗鏍囬噸缃负鍒濆浣嶇疆
+     */
+    @Override
+    public void reset() {
+<span class="fc" id="L89">        this.x = initX;</span>
+<span class="fc" id="L90">        this.y = initY;</span>
+<span class="fc" id="L91">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

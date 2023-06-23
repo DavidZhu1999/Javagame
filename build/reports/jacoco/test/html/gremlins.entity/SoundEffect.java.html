@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SoundEffect.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">gremlins_scaffold</a> &gt; <a href="index.source.html" class="el_package">gremlins.entity</a> &gt; <span class="el_source">SoundEffect.java</span></div><h1>SoundEffect.java</h1><pre class="source lang-java linenums">package gremlins.entity;
+
+import javax.sound.sampled.*;
+import java.io.File;
+import java.io.IOException;
+
+/**
+ * 闊充箰鎾斁鏋氫妇绫�
+ */
+<span class="fc" id="L10">public enum SoundEffect {</span>
+<span class="fc" id="L11">    DEATH(&quot;src/main/resources/gremlins/Death.wav&quot;),</span>
+<span class="fc" id="L12">    POWERUP(&quot;src/main/resources/gremlins/Powerup.wav&quot;),</span>
+    ;
+
+    private Clip clip;
+
+<span class="fc" id="L17">    private SoundEffect(String soundFileName) {</span>
+        // sets the sound effect
+        try {
+<span class="fc" id="L20">            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new File(soundFileName));</span>
+<span class="fc" id="L21">            clip = AudioSystem.getClip();</span>
+<span class="fc" id="L22">            clip.open(audioInputStream);</span>
+<span class="nc" id="L23">        } catch (UnsupportedAudioFileException e) {</span>
+<span class="nc" id="L24">            e.printStackTrace();</span>
+<span class="nc" id="L25">        } catch (IOException e) {</span>
+<span class="nc" id="L26">            e.printStackTrace();</span>
+<span class="nc" id="L27">        } catch (LineUnavailableException e) {</span>
+<span class="nc" id="L28">            e.printStackTrace();</span>
+<span class="pc" id="L29">        }</span>
+<span class="fc" id="L30">    }</span>
+
+    /**
+     * 鎾斁闊充箰
+     */
+    public void play() {
+        // plays the sound effect
+<span class="pc bpc" id="L37" title="1 of 2 branches missed.">        if (clip.isRunning()) {</span>
+<span class="nc" id="L38">            clip.stop();</span>
+        }
+<span class="fc" id="L40">        clip.setFramePosition(0);</span>
+<span class="fc" id="L41">        clip.start();</span>
+<span class="fc" id="L42">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

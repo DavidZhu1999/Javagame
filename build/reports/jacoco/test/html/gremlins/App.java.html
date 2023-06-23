@@ -1,0 +1,629 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>App.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">gremlins_scaffold</a> &gt; <a href="index.source.html" class="el_package">gremlins</a> &gt; <span class="el_source">App.java</span></div><h1>App.java</h1><pre class="source lang-java linenums">package gremlins;
+
+import gremlins.config.GameConfiguration;
+import gremlins.entity.*;
+import processing.core.PApplet;
+import processing.core.PImage;
+import processing.data.IntList;
+import processing.data.JSONObject;
+
+import java.text.DecimalFormat;
+import java.util.*;
+import java.io.*;
+
+
+/**
+ * 娓告垙鏄剧ず涓荤被
+ * 娓告垙涓渶瑕佽绠楁椂闂寸殑鍧囦娇鐢ㄥ抚鏁颁唬鏇� 锛� 1 s = 60 甯�
+ */
+public class App extends PApplet {
+
+    /**
+     * 绐椾綋瀹藉害
+     */
+    public static final int WIDTH = 720;
+    /**
+     * 绐椾綋楂樺害
+     */
+    public static final int HEIGHT = 720;
+    /**
+     * 姣忔牸鍍忕礌鍊�
+     */
+    public static final int PIXEL = 20;
+
+    /**
+     * 鏁屼汉姝讳骸鍚庨噸鐢熻窛绂荤帺瀹剁殑鏈�灏忚窛绂荤殑骞虫柟
+     */
+    public static final int AWAY_DISTANCE = 100 * PIXEL * PIXEL;
+
+    /**
+     * 鐜╁瑙掕壊绉诲姩閫熷害
+     */
+    public static final int WIZARD_SPEED = 2;
+
+    /**
+     * 鏁屼汉绉诲姩閫熷害
+     */
+    public static final int GREMLIN_SPEED = 1;
+
+    /**
+     * 瀛愬脊绉诲姩閫熷害
+     */
+    public static final int BULLET_SPEED = 4;
+
+    /**
+     * 娓告垙灞忓箷鍒锋柊棰戠巼
+     */
+    public static final int FPS = 60;
+
+    /**
+     * 鏁屼汉鍐峰喕鏃堕暱 锛�4 s锛�
+     */
+    public static final int FREEZE_FPS = 4 * FPS;
+
+    /**
+     * 閰嶇疆鏂囦欢璺緞
+     */
+    private String configPath;
+
+    /**
+     * 鐢ㄦ埛鎿嶄綔鎸夐敭鍒楄〃
+     */
+<span class="nc" id="L72">    private IntList keys = new IntList();</span>
+
+    /**
+     * 鏁板瓧鏍煎紡鍖栧伐鍏凤紝淇濈暀涓変綅灏忔暟
+     */
+<span class="nc" id="L77">    private DecimalFormat decimalFormat = new DecimalFormat(&quot;#0.000&quot;);</span>
+
+    /**
+     * 鍔犺浇鐨勫浘鐗囩紦瀛�
+     */
+    private Map&lt;Character, PImage&gt; cacheImage;
+    /**
+     * 娓告垙褰撳墠鍏冲崱鐨勬晫浜洪泦鍚�
+     */
+    private List&lt;Gremlins&gt; gremlins;
+    /**
+     * 娓告垙褰撳墠鍏冲崱鐨勫瓙寮归泦鍚�
+     */
+    private List&lt;Bullet&gt; bullets;
+    /**
+     * 娓告垙閰嶇疆绫�
+     */
+    private GameConfiguration gameConfig;
+    /**
+     * 鐜╁鎿嶇旱瀵硅薄
+     */
+    private Wizard wizard;
+    /**
+     * 娓告垙褰撳墠鍏冲崱鍦板浘
+     */
+    private Tile[][] map;
+    /**
+     * 娓告垙鐘舵��  0 姝ｅ父杩愯锛� 100 閫氬叧锛� 200 澶辫触
+     */
+    private int status;
+
+    /**
+     * 閰嶇疆鏂囦欢瀵硅薄
+     */
+    private JSONObject conf;
+
+    /**
+     * 鏁屼汉琚喎鍐荤殑鏃堕暱锛� -1 浠ｈ〃鏈喎鍐�
+     */
+<span class="nc" id="L116">    private int freezeFrame = -1;</span>
+    /**
+     * 鍐峰喕閬撳叿閲嶇敓鏃堕暱 5 s
+     */
+<span class="nc" id="L120">    private int rebornFps = 5 * FPS;</span>
+    /**
+     * 鍐峰喕閬撳叿浣跨敤鍚庣粡杩囩殑鏃堕暱 锛堝抚鏁帮級
+     */
+<span class="nc" id="L124">    private int rebornCur = -1;</span>
+
+    /**
+     * 鏋勯�犲嚱鏁�
+     */
+<span class="nc" id="L129">    public App() {</span>
+<span class="nc" id="L130">        this.configPath = &quot;config.json&quot;;</span>
+<span class="nc" id="L131">    }</span>
+
+    /**
+     * Initialise the setting of the window size.
+     */
+    public void settings() {
+<span class="nc" id="L137">        size(WIDTH, HEIGHT);</span>
+<span class="nc" id="L138">        smooth();</span>
+<span class="nc" id="L139">    }</span>
+
+    /**
+     * Load all resources such as images. Initialise the elements such as the player, enemies and map elements.
+     */
+    public void setup() {
+<span class="nc" id="L145">        frameRate(FPS);</span>
+<span class="nc" id="L146">        background(227, 168, 105);</span>
+<span class="nc" id="L147">        g.textFont(createDefaultFont(10));</span>
+<span class="nc" id="L148">        gremlins = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L149">        bullets = new ArrayList&lt;&gt;();</span>
+        // Load images during setup
+
+<span class="nc" id="L152">        conf = loadJSONObject(new File(this.configPath));</span>
+<span class="nc" id="L153">        gameConfig = new GameConfiguration(conf);</span>
+<span class="nc" id="L154">        map = gameConfig.getLevel().getMap();</span>
+<span class="nc" id="L155">        loadImage();</span>
+<span class="nc" id="L156">    }</span>
+
+    /**
+     * 鍔犺浇鍥剧墖鍒扮紦瀛樹腑锛岄槻姝簩娆″姞杞�
+     */
+    private void loadImage() {
+<span class="nc" id="L162">        this.cacheImage = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L163">        this.cacheImage.put('X', loadImage(this.getClass().getResource(&quot;stonewall.png&quot;).getPath().replace(&quot;%20&quot;, &quot;&quot;)));</span>
+<span class="nc" id="L164">        this.cacheImage.put('B', loadImage(this.getClass().getResource(&quot;brickwall.png&quot;).getPath().replace(&quot;%20&quot;, &quot;&quot;)));</span>
+<span class="nc" id="L165">        this.cacheImage.put('E', loadImage(this.getClass().getResource(&quot;gate.png&quot;).getPath().replace(&quot;%20&quot;, &quot;&quot;)));</span>
+<span class="nc" id="L166">        this.cacheImage.put('G', loadImage(this.getClass().getResource(&quot;gremlin.png&quot;).getPath().replace(&quot;%20&quot;, &quot;&quot;)));</span>
+<span class="nc" id="L167">        this.cacheImage.put('S', loadImage(this.getClass().getResource(&quot;slime.png&quot;).getPath().replace(&quot;%20&quot;, &quot;&quot;)));</span>
+<span class="nc" id="L168">        this.cacheImage.put('s', loadImage(this.getClass().getResource(&quot;fireball.png&quot;).getPath().replace(&quot;%20&quot;, &quot;&quot;)));</span>
+<span class="nc" id="L169">        this.cacheImage.put((char) 37, loadImage(this.getClass().getResource(&quot;wizard0.png&quot;).getPath().replace(&quot;%20&quot;, &quot;&quot;)));</span>
+<span class="nc" id="L170">        this.cacheImage.put((char) 38, loadImage(this.getClass().getResource(&quot;wizard2.png&quot;).getPath().replace(&quot;%20&quot;, &quot;&quot;)));</span>
+<span class="nc" id="L171">        this.cacheImage.put((char) 39, loadImage(this.getClass().getResource(&quot;wizard1.png&quot;).getPath().replace(&quot;%20&quot;, &quot;&quot;)));</span>
+<span class="nc" id="L172">        this.cacheImage.put('W', loadImage(this.getClass().getResource(&quot;wizard1.png&quot;).getPath().replace(&quot;%20&quot;, &quot;&quot;)));</span>
+<span class="nc" id="L173">        this.cacheImage.put((char) 40, loadImage(this.getClass().getResource(&quot;wizard3.png&quot;).getPath().replace(&quot;%20&quot;, &quot;&quot;)));</span>
+<span class="nc" id="L174">        this.cacheImage.put('U', loadImage(this.getClass().getResource(&quot;freezewall.png&quot;).getPath().replace(&quot;%20&quot;, &quot;&quot;)));</span>
+<span class="nc" id="L175">        PImage d0 = loadImage(this.getClass().getResource(&quot;brickwall_destroyed0.png&quot;).getPath().replace(&quot;%20&quot;, &quot;&quot;));</span>
+<span class="nc" id="L176">        this.cacheImage.put((char) 1, d0);</span>
+<span class="nc" id="L177">        this.cacheImage.put((char) 2, d0);</span>
+<span class="nc" id="L178">        this.cacheImage.put((char) 3, d0);</span>
+<span class="nc" id="L179">        this.cacheImage.put((char) 4, d0);</span>
+<span class="nc" id="L180">        PImage d1 = loadImage(this.getClass().getResource(&quot;brickwall_destroyed1.png&quot;).getPath().replace(&quot;%20&quot;, &quot;&quot;));</span>
+<span class="nc" id="L181">        this.cacheImage.put((char) 5, d1);</span>
+<span class="nc" id="L182">        this.cacheImage.put((char) 6, d1);</span>
+<span class="nc" id="L183">        this.cacheImage.put((char) 7, d1);</span>
+<span class="nc" id="L184">        this.cacheImage.put((char) 8, d1);</span>
+<span class="nc" id="L185">        PImage d2 = loadImage(this.getClass().getResource(&quot;brickwall_destroyed2.png&quot;).getPath().replace(&quot;%20&quot;, &quot;&quot;));</span>
+<span class="nc" id="L186">        this.cacheImage.put((char) 9, d2);</span>
+<span class="nc" id="L187">        this.cacheImage.put((char) 10, d2);</span>
+<span class="nc" id="L188">        this.cacheImage.put((char) 11, d2);</span>
+<span class="nc" id="L189">        this.cacheImage.put((char) 12, d2);</span>
+<span class="nc" id="L190">        PImage d3 = loadImage(this.getClass().getResource(&quot;brickwall_destroyed3.png&quot;).getPath().replace(&quot;%20&quot;, &quot;&quot;));</span>
+<span class="nc" id="L191">        this.cacheImage.put((char) 13, d3);</span>
+<span class="nc" id="L192">        this.cacheImage.put((char) 14, d3);</span>
+<span class="nc" id="L193">        this.cacheImage.put((char) 15, d3);</span>
+<span class="nc" id="L194">        this.cacheImage.put((char) 16, d3);</span>
+
+<span class="nc" id="L196">        PImage freeze = loadImage(this.getClass().getResource(&quot;freeze.png&quot;).getPath().replace(&quot;%20&quot;, &quot;&quot;));</span>
+<span class="nc" id="L197">        this.cacheImage.put('F', freeze);</span>
+<span class="nc" id="L198">    }</span>
+
+    /**
+     * 閬撳叿閲嶇敓璁℃椂
+     */
+    private void rebornTimer() {
+<span class="nc bnc" id="L204" title="All 2 branches missed.">        if (rebornCur &gt;= 0) {</span>
+<span class="nc" id="L205">            rebornCur++;</span>
+<span class="nc bnc" id="L206" title="All 2 branches missed.">            if (rebornCur &gt;= rebornFps) {</span>
+<span class="nc bnc" id="L207" title="All 2 branches missed.">                for (int i = 0; i &lt; map.length; i++) {</span>
+<span class="nc bnc" id="L208" title="All 2 branches missed.">                    for (int j = 0; j &lt; map[i].length; j++) {</span>
+<span class="nc" id="L209">                        Tile tile = map[i][j];</span>
+<span class="nc bnc" id="L210" title="All 2 branches missed.">                        if (tile.getInitCharacter() == 'F') {</span>
+<span class="nc" id="L211">                            tile.setCharacter('F');</span>
+                        }
+                    }
+                }
+<span class="nc" id="L215">                rebornCur = -1;</span>
+            }
+        }
+<span class="nc" id="L218">    }</span>
+
+
+    /**
+     * 涓荤晫闈㈡覆鏌撳浘鐗囥�傛覆鏌撻�昏緫濡備笅锛�
+     * 鐮栧潡绛変笉鑳界Щ鍔ㄧ殑鐗╀綋锛屾牴鎹� map 浜岀淮鏁扮粍鐨勭鍙疯幏鍙栧浘鐗囩紦瀛樺櫒鍥剧墖骞跺姞杞斤紝鐒跺悗鏍规嵁浜岀淮鏁扮粍鐨勫潗鏍囨覆鏌撳埌鎸囧畾鐨勪綅缃�
+     * 鐜╁锛屽瓙寮癸紝鏁屼汉 绛夊彲浠ョЩ鍔ㄧ殑鐗╀綋銆傛牴鎹綋鍓嶇被涓殑瀵硅薄锛屼娇鐢ㄥ璞＄殑 x 鍜� y 鍧愭爣娓叉煋鍥剧墖鍒板搴斾綅缃�
+     */
+    private void showImage() {
+<span class="nc" id="L227">        rebornTimer();</span>
+<span class="nc bnc" id="L228" title="All 2 branches missed.">        if (freezeFrame &gt;= 0) {</span>
+<span class="nc" id="L229">            freezeFrame++;</span>
+<span class="nc bnc" id="L230" title="All 2 branches missed.">            if (freezeFrame &gt;= FREEZE_FPS) {</span>
+<span class="nc" id="L231">                freezeFrame = -1;</span>
+            }
+        }
+<span class="nc bnc" id="L234" title="All 2 branches missed.">        if (freezeFrame &lt; 0) {</span>
+<span class="nc bnc" id="L235" title="All 2 branches missed.">            for (Gremlins g : this.gremlins) {</span>
+<span class="nc" id="L236">                g.setSpeed(GREMLIN_SPEED);</span>
+<span class="nc" id="L237">            }</span>
+        }
+<span class="nc bnc" id="L239" title="All 2 branches missed.">        if (wizard != null) {</span>
+            // 鐜╁浣跨敤鍐峰喕閬撳叿妫�娴�
+<span class="nc bnc" id="L241" title="All 2 branches missed.">            if (map[wizard.getY() / PIXEL][wizard.getX() / PIXEL].getCharacter() == 'F') {</span>
+<span class="nc" id="L242">                map[wizard.getY() / PIXEL][wizard.getX() / PIXEL].setCharacter(' ');</span>
+<span class="nc" id="L243">                freezeEnemy();</span>
+<span class="nc" id="L244">                rebornCur = 1;</span>
+            }
+            // 鐜╁绉诲姩鍒板嚭鍙ｆ娴�
+<span class="nc bnc" id="L247" title="All 2 branches missed.">            if (map[wizard.getY() / PIXEL][wizard.getX() / PIXEL].getCharacter() == 'E') {</span>
+<span class="nc bnc" id="L248" title="All 2 branches missed.">                if (gameConfig.getLevelNumber() == 2) {</span>
+                    // win 锛屾鏃跺浜庢渶鍚庝竴鍏�
+<span class="nc" id="L250">                    status = 100;</span>
+                } else {
+                    // next Level锛� 姝ゆ椂涓哄埌杈炬渶鍚庝竴鍏�
+<span class="nc" id="L253">                    gameConfig.nextLevel();</span>
+<span class="nc" id="L254">                    map = gameConfig.getLevel().getMap();</span>
+<span class="nc" id="L255">                    wizard = null;</span>
+<span class="nc" id="L256">                    bullets.clear();</span>
+<span class="nc" id="L257">                    gremlins.clear();</span>
+                }
+<span class="nc" id="L259">                return;</span>
+            }
+        }
+        // 娓叉煋鐣岄潰鏄剧ず鏁堟灉
+<span class="nc bnc" id="L263" title="All 2 branches missed.">        for (int i = 0; i &lt; map.length; i++) {</span>
+<span class="nc bnc" id="L264" title="All 2 branches missed.">            for (int j = 0; j &lt; map[i].length; j++) {</span>
+<span class="nc" id="L265">                Tile tile = map[i][j];</span>
+<span class="nc" id="L266">                PImage image = cacheImage.get(tile.getCharacter());</span>
+<span class="nc bnc" id="L267" title="All 2 branches missed.">                if (tile.getCharacter() == 'W') {</span>
+<span class="nc bnc" id="L268" title="All 2 branches missed.">                    if (wizard == null) {</span>
+<span class="nc" id="L269">                        wizard = new Wizard(WIZARD_SPEED, tile.getX() * PIXEL, tile.getY() * PIXEL);</span>
+<span class="nc" id="L270">                        wizard.setImage(image);</span>
+                    }
+<span class="nc bnc" id="L272" title="All 2 branches missed.">                } else if (tile.getCharacter() == 'G') {</span>
+                    // 娓叉煋鏁屼汉
+<span class="nc" id="L274">                    Gremlins gremlin = new Gremlins(GREMLIN_SPEED, tile.getX() * PIXEL, tile.getY() * PIXEL);</span>
+<span class="nc bnc" id="L275" title="All 2 branches missed.">                    if (!this.gremlins.contains(gremlin)) {</span>
+<span class="nc" id="L276">                        this.gremlins.add(gremlin);</span>
+                    }
+<span class="nc" id="L278">                } else {</span>
+                    // 娓叉煋鐮栧潡浠ュ強鍏朵粬鐗╀綋
+<span class="nc bnc" id="L280" title="All 2 branches missed.">                    if (tile.getCharacter() == 'B') {</span>
+<span class="nc bnc" id="L281" title="All 2 branches missed.">                        if (tile.getFrame() &gt;= 0) {</span>
+<span class="nc" id="L282">                            tile.addFrame();</span>
+<span class="nc" id="L283">                            PImage r = cacheImage.get((char) tile.getFrame());</span>
+<span class="nc bnc" id="L284" title="All 2 branches missed.">                            if (r != null) {</span>
+<span class="nc" id="L285">                                image(r, tile.getX() * PIXEL, tile.getY() * PIXEL);</span>
+                            }
+<span class="nc" id="L287">                        } else {</span>
+<span class="nc" id="L288">                            image(image, tile.getX() * PIXEL, tile.getY() * PIXEL);</span>
+                        }
+                    } else {
+<span class="nc bnc" id="L291" title="All 2 branches missed.">                        if (image != null) {</span>
+<span class="nc" id="L292">                            image(image, tile.getX() * PIXEL, tile.getY() * PIXEL);</span>
+                        }
+                    }
+                }
+            }
+        }
+        // 娑堣垂鐜╁宸叉寜閿晥鏋�
+<span class="nc bnc" id="L299" title="All 2 branches missed.">        if (keys.size() &gt; 0) {</span>
+<span class="nc" id="L300">            consumeKeys();</span>
+        } else {
+<span class="nc" id="L302">            continueMove();</span>
+        }
+        // 娓叉煋鐜╁鍥剧墖
+<span class="nc" id="L305">        image(wizard.getImage(), wizard.getX(), wizard.getY());</span>
+
+<span class="nc bnc" id="L307" title="All 2 branches missed.">        for (Gremlins g : this.gremlins) {</span>
+<span class="nc" id="L308">            Bullet shoot = g.shoot(gameConfig.getLevel().getEnemyCooldown());</span>
+<span class="nc bnc" id="L309" title="All 2 branches missed.">            if (shoot != null) {</span>
+<span class="nc" id="L310">                bullets.add(shoot);</span>
+            }
+            // 鏁屼汉绉诲姩
+<span class="nc" id="L313">            g.move(map);</span>
+            // 鐜╁涓庢晫浜烘挒鍑绘娴�
+<span class="nc bnc" id="L315" title="All 2 branches missed.">            if (wizard.collideWith(g)) {</span>
+<span class="nc" id="L316">                afterWizardDead();</span>
+<span class="nc" id="L317">                return;</span>
+            }
+
+            // 瀛愬脊鎾炲嚮妫�娴�
+<span class="nc bnc" id="L321" title="All 2 branches missed.">            for (MoveThing bullet : this.bullets) {</span>
+<span class="nc bnc" id="L322" title="All 2 branches missed.">                for (Bullet bullet1 : this.bullets) {</span>
+<span class="nc bnc" id="L323" title="All 2 branches missed.">                    if (bullet == bullet1) {</span>
+<span class="nc" id="L324">                        continue;</span>
+                    }
+                    // 鐜╁瀛愬脊涓庢晫浜哄瓙寮规挒鍑绘娴�
+<span class="nc bnc" id="L327" title="All 4 branches missed.">                    if (bullet.collideWith(bullet1) &amp;&amp; bullet.getClass() != bullet1.getClass()) {</span>
+<span class="nc" id="L328">                        bullet.markForDelete();</span>
+<span class="nc" id="L329">                        bullet1.markForDelete();</span>
+<span class="nc" id="L330">                        break;</span>
+                    }
+<span class="nc" id="L332">                }</span>
+
+                // 瀛愬脊鎾炲嚮鍒扮爾鍧楁娴�
+<span class="nc bnc" id="L335" title="All 2 branches missed.">                for (Tile[] tiles : map) {</span>
+<span class="nc bnc" id="L336" title="All 2 branches missed.">                    for (Tile tile : tiles) {</span>
+<span class="nc bnc" id="L337" title="All 2 branches missed.">                        if (bullet.collideWith(tile)) {</span>
+<span class="nc bnc" id="L338" title="All 2 branches missed.">                            if (tile.getCharacter() == 'X') {</span>
+<span class="nc" id="L339">                                bullet.markForDelete();</span>
+<span class="nc bnc" id="L340" title="All 2 branches missed.">                            } else if (tile.getCharacter() == 'B') {</span>
+<span class="nc" id="L341">                                tile.addFrame();</span>
+<span class="nc" id="L342">                                bullet.markForDelete();</span>
+<span class="nc bnc" id="L343" title="All 2 branches missed.">                            } else if (tile.getCharacter() == 'U') {</span>
+<span class="nc" id="L344">                                freezeEnemy();</span>
+<span class="nc" id="L345">                                tile.setCharacter(' ');</span>
+<span class="nc" id="L346">                                bullet.markForDelete();</span>
+                            }
+                            break;
+                        }
+                    }
+                }
+
+<span class="nc bnc" id="L353" title="All 2 branches missed.">                if (bullet.isMarkForDelete()) {</span>
+<span class="nc" id="L354">                    continue;</span>
+                }
+
+                // 鏁屼汉鎾炲嚮鍒扮帺瀹跺瓙寮规娴�
+<span class="nc bnc" id="L358" title="All 4 branches missed.">                if (g.collideWith(bullet) &amp;&amp; bullet instanceof FireBall) {</span>
+<span class="nc" id="L359">                    g.awayFrom(wizard.getX(), wizard.getY(), map);</span>
+<span class="nc" id="L360">                    bullet.markForDelete();</span>
+<span class="nc" id="L361">                    break;</span>
+                }
+<span class="nc" id="L363">            }</span>
+<span class="nc" id="L364">            image(cacheImage.get('G'), g.getX(), g.getY());</span>
+<span class="nc" id="L365">        }</span>
+
+        // 鍒犻櫎鏍囪浣嶅垹闄ょ殑鐗╀綋锛堝瓙寮癸級
+<span class="nc" id="L368">        this.bullets.removeIf(MoveThing::isMarkForDelete);</span>
+
+<span class="nc bnc" id="L370" title="All 2 branches missed.">        for (MoveThing bullet : this.bullets) {</span>
+<span class="nc" id="L371">            bullet.move(map);</span>
+            // 鏁屼汉瀛愬脊鎾炲嚮鍒扮帺瀹舵娴�
+<span class="nc bnc" id="L373" title="All 4 branches missed.">            if (bullet instanceof SlimeProjectile &amp;&amp; wizard.collideWith(bullet)) {</span>
+<span class="nc" id="L374">                afterWizardDead();</span>
+<span class="nc" id="L375">                return;</span>
+            }
+<span class="nc bnc" id="L377" title="All 2 branches missed.">            if (bullet instanceof SlimeProjectile) {</span>
+<span class="nc" id="L378">                image(cacheImage.get('S'), bullet.getX(), bullet.getY());</span>
+            } else {
+<span class="nc" id="L380">                image(cacheImage.get('s'), bullet.getX(), bullet.getY());</span>
+            }
+            // 瀛愬脊绉诲嚭鍦板浘澶栭儴妫�娴�
+<span class="nc bnc" id="L383" title="All 2 branches missed.">            if (bullet.outOfBound()) {</span>
+<span class="nc" id="L384">                bullet.markForDelete();</span>
+            }
+<span class="nc" id="L386">        }</span>
+<span class="nc" id="L387">    }</span>
+
+    /**
+     * 鐜╁姝讳骸鍚庨�昏緫
+     * 1. 鎵ｅ噺鐢熷懡
+     * 2. 鍒ゆ柇鐢熷懡鏄惁瓒冲锛� 涓嶈冻鏄剧ず澶辫触锛岃冻澶熼噸鏂板紑濮嬪綋鍓嶅叧鍗�
+     */
+    private void afterWizardDead() {
+<span class="nc" id="L395">        gameConfig.reduceLive();</span>
+<span class="nc" id="L396">        SoundEffect.DEATH.play();</span>
+<span class="nc bnc" id="L397" title="All 2 branches missed.">        if (gameConfig.getLiveNumber() &lt;= 0) {</span>
+<span class="nc" id="L398">            status = 200;</span>
+        } else {
+<span class="nc" id="L400">            resetGame();</span>
+        }
+<span class="nc" id="L402">    }</span>
+
+    /**
+     * 鏁屼汉鍐荤粨鏁堟灉锛岄�熷害涓� 0
+     */
+    private void freezeEnemy() {
+<span class="nc bnc" id="L408" title="All 2 branches missed.">        for (Gremlins g : this.gremlins) {</span>
+<span class="nc" id="L409">            g.setSpeed(0);</span>
+<span class="nc" id="L410">        }</span>
+<span class="nc" id="L411">        SoundEffect.POWERUP.play();</span>
+<span class="nc" id="L412">        freezeFrame = 0;</span>
+<span class="nc" id="L413">    }</span>
+
+    /**
+     * 鏄剧ず娓告垙鑾疯儨
+     */
+    private void showWin() {
+<span class="nc" id="L419">        text(&quot;You win &quot;, 300, 360);</span>
+<span class="nc" id="L420">    }</span>
+
+    /**
+     * 鏄剧ず娓告垙澶辫触
+     */
+    private void showFail() {
+<span class="nc" id="L426">        text(&quot;Game over &quot;, 300, 360);</span>
+<span class="nc" id="L427">    }</span>
+
+
+    /**
+     * 閲嶆柊寮�濮嬪綋鍓嶅叧鍗�
+     * 1 鍦板浘閲嶇疆
+     * 2 鐜╁鍧愭爣閲嶇疆
+     * 3 鏁屼汉鍧愭爣閲嶇疆
+     * 4 灞忓箷瀛愬脊娓呯┖
+     */
+    private void resetGame() {
+<span class="nc" id="L438">        map = gameConfig.getLevel().reset();</span>
+<span class="nc" id="L439">        wizard.reset();</span>
+<span class="nc" id="L440">        wizard.setImage(cacheImage.get('W'));</span>
+<span class="nc bnc" id="L441" title="All 2 branches missed.">        for (Gremlins g : gremlins) {</span>
+<span class="nc" id="L442">            g.reset();</span>
+<span class="nc" id="L443">        }</span>
+<span class="nc" id="L444">        this.bullets.clear();</span>
+<span class="nc" id="L445">    }</span>
+
+    /**
+     * 鏄剧ず娓告垙褰撳墠淇℃伅
+     */
+    private void showGameInfo() {
+        // 鏄剧ず鐢熷懡
+<span class="nc" id="L452">        text(&quot;Lives: &quot;, PIXEL, 695);</span>
+<span class="nc" id="L453">        int liveNumber = gameConfig.getLiveNumber();</span>
+<span class="nc" id="L454">        PImage image = cacheImage.get('W');</span>
+<span class="nc bnc" id="L455" title="All 2 branches missed.">        for (int i = 0; i &lt; liveNumber; i++) {</span>
+<span class="nc" id="L456">            set(3 * PIXEL + PIXEL * (i + 1), 680, image);</span>
+        }
+
+        // 鏄剧ず褰撳墠鍏冲崱
+<span class="nc" id="L460">        text(&quot;Level &quot; + gameConfig.getLevelNumber() + &quot;/2&quot;, 8 * PIXEL, 695);</span>
+
+        // 鏄剧ず鏁屼汉鍐峰嵈鍓╀綑鏃堕棿
+<span class="nc bnc" id="L463" title="All 2 branches missed.">        if (freezeFrame &gt; 0) {</span>
+<span class="nc" id="L464">            text(&quot;Left Freeze Time: &quot; + (FREEZE_FPS - freezeFrame) / FPS, 14 * PIXEL, 695);</span>
+        }
+
+        // 鏄剧ず鐜╁瀛愬脊閲婃斁鍐峰嵈鏃堕棿
+<span class="nc bnc" id="L468" title="All 2 branches missed.">        if (wizard != null) {</span>
+<span class="nc" id="L469">            long l1 = System.currentTimeMillis() - wizard.getShootTime();</span>
+<span class="nc" id="L470">            double wizardCooldown = gameConfig.getLevel().getWizardCooldown();</span>
+<span class="nc" id="L471">            double d = (l1) * 0.001;</span>
+<span class="nc bnc" id="L472" title="All 2 branches missed.">            if (d &lt; wizardCooldown) {</span>
+<span class="nc" id="L473">                text(&quot;wizard cool Time: &quot; + decimalFormat.format(wizardCooldown - d), 23 * PIXEL, 695);</span>
+            }
+        }
+
+<span class="nc" id="L477">    }</span>
+
+
+    /**
+     * Receive key pressed signal from the keyboard.
+     */
+    public void keyPressed() {
+<span class="nc bnc" id="L484" title="All 4 branches missed.">        if (status == 100 || status == 200) {</span>
+<span class="nc" id="L485">            status = 0;</span>
+<span class="nc" id="L486">            gameConfig = new GameConfiguration(conf);</span>
+<span class="nc" id="L487">            map = gameConfig.getLevel().getMap();</span>
+<span class="nc" id="L488">            gremlins.clear();</span>
+<span class="nc" id="L489">            bullets.clear();</span>
+<span class="nc" id="L490">            wizard = null;</span>
+<span class="nc" id="L491">            return;</span>
+        }
+        //                38  up
+        //                40  down
+        //                37  left
+        //                39  right
+        //                32  space
+<span class="nc bnc" id="L498" title="All 8 branches missed.">        if (keyCode == 37 || keyCode == 38 || keyCode == 39 || keyCode == 40) {</span>
+<span class="nc bnc" id="L499" title="All 10 branches missed.">            if ((keys.hasValue(37) || keys.hasValue(38) || keys.hasValue(39) || keys.hasValue(40)) || needMove()) {</span>
+
+<span class="nc bnc" id="L501" title="All 2 branches missed.">            } else if (!needMove()) {</span>
+<span class="nc" id="L502">                keys.append(keyCode);</span>
+            }
+<span class="nc bnc" id="L504" title="All 2 branches missed.">        } else if (!keys.hasValue(keyCode)) {</span>
+<span class="nc" id="L505">            keys.append(keyCode);</span>
+        }
+<span class="nc" id="L507">    }</span>
+
+    /**
+     * Receive key released signal from the keyboard.
+     */
+    public void keyReleased() {
+<span class="nc bnc" id="L513" title="All 2 branches missed.">        if (keys.hasValue(keyCode)) {</span>
+<span class="nc" id="L514">            keys.removeValue(keyCode);</span>
+        }
+
+<span class="nc" id="L517">    }</span>
+
+    /**
+     * 鍒ゆ柇鐜╁鏄惁搴旇绉诲姩锛堝崱澧欑姸鎬佹娴嬶級
+     *
+     * @return true 浠ｈ〃澶勪簬鍗″浣嶇疆闇�瑕佺户缁Щ鍔紝 false 浠ｈ〃鏃犻渶缁х画绉诲姩
+     */
+    private boolean needMove() {
+<span class="nc bnc" id="L525" title="All 2 branches missed.">        if (status == 0) {</span>
+<span class="nc bnc" id="L526" title="All 2 branches missed.">            boolean xIsOk = wizard.getX() % 20 == 0;</span>
+<span class="nc bnc" id="L527" title="All 2 branches missed.">            boolean yIsOk = wizard.getY() % 20 == 0;</span>
+<span class="nc bnc" id="L528" title="All 4 branches missed.">            if (!xIsOk || !yIsOk) {</span>
+<span class="nc" id="L529">                return true;</span>
+            }
+        }
+<span class="nc" id="L532">        return false;</span>
+    }
+
+    /**
+     * 鐜╁鎸夐敭鏁堟灉閫昏緫
+     */
+    private void consumeKeys() {
+<span class="nc bnc" id="L539" title="All 2 branches missed.">        for (int keyCode : keys) {</span>
+<span class="nc" id="L540">            PImage image = cacheImage.get((char) keyCode);</span>
+<span class="nc bnc" id="L541" title="All 6 branches missed.">            switch (keyCode) {</span>
+                case 38:
+<span class="nc" id="L543">                    wizard.up(map);</span>
+<span class="nc" id="L544">                    wizard.updateDirection(0);</span>
+<span class="nc" id="L545">                    break;</span>
+                case 40:
+<span class="nc" id="L547">                    wizard.down(map);</span>
+<span class="nc" id="L548">                    wizard.updateDirection(1);</span>
+<span class="nc" id="L549">                    break;</span>
+                case 37:
+<span class="nc" id="L551">                    wizard.left(map);</span>
+<span class="nc" id="L552">                    wizard.updateDirection(2);</span>
+<span class="nc" id="L553">                    break;</span>
+                case 39:
+<span class="nc" id="L555">                    wizard.right(map);</span>
+<span class="nc" id="L556">                    wizard.updateDirection(3);</span>
+<span class="nc" id="L557">                    break;</span>
+                case 32:
+<span class="nc" id="L559">                    Bullet bullet = wizard.shoot(gameConfig.getLevel().getWizardCooldown());</span>
+<span class="nc bnc" id="L560" title="All 2 branches missed.">                    if (bullet != null) {</span>
+<span class="nc" id="L561">                        this.bullets.add(bullet);</span>
+                    }
+                    break;
+            }
+<span class="nc bnc" id="L565" title="All 2 branches missed.">            if (image != null) {</span>
+<span class="nc" id="L566">                wizard.setImage(image);</span>
+            }
+<span class="nc" id="L568">        }</span>
+<span class="nc" id="L569">    }</span>
+
+
+    /**
+     * Draw all elements in the game by current frame.
+     */
+    public void draw() {
+        // 鑳屾櫙鑹�
+<span class="nc" id="L577">        background(227, 168, 105);</span>
+        // 鏍规嵁娓告垙鐘舵�佹樉绀轰笉鍚屽唴瀹�
+<span class="nc bnc" id="L579" title="All 2 branches missed.">        if (status == 100) {</span>
+<span class="nc" id="L580">            textSize(50);</span>
+<span class="nc" id="L581">            showWin();</span>
+<span class="nc" id="L582">            textSize(12);</span>
+<span class="nc bnc" id="L583" title="All 2 branches missed.">        } else if (status == 200) {</span>
+<span class="nc" id="L584">            textSize(50);</span>
+<span class="nc" id="L585">            showFail();</span>
+<span class="nc" id="L586">            textSize(12);</span>
+        } else {
+<span class="nc" id="L588">            showImage();</span>
+<span class="nc" id="L589">            showGameInfo();</span>
+        }
+<span class="nc" id="L591">    }</span>
+
+
+    /**
+     * 鐜╁妫�娴嬪埌鍗″鐘舵�佸悗鐨勮ˉ鍋跨Щ鍔ㄩ�昏緫
+     */
+    private void continueMove() {
+<span class="nc bnc" id="L598" title="All 2 branches missed.">        if (wizard == null) {</span>
+<span class="nc" id="L599">            return;</span>
+        }
+<span class="nc bnc" id="L601" title="All 2 branches missed.">        if (needMove()) {</span>
+<span class="nc bnc" id="L602" title="All 5 branches missed.">            switch (wizard.getDirection()) {</span>
+                case 0:
+<span class="nc" id="L604">                    wizard.up(map);</span>
+<span class="nc" id="L605">                    break;</span>
+                case 1:
+<span class="nc" id="L607">                    wizard.down(map);</span>
+<span class="nc" id="L608">                    break;</span>
+                case 2:
+<span class="nc" id="L610">                    wizard.left(map);</span>
+<span class="nc" id="L611">                    break;</span>
+                case 3:
+<span class="nc" id="L613">                    wizard.right(map);</span>
+                    break;
+            }
+        }
+
+<span class="nc" id="L618">    }</span>
+
+    /**
+     * 娓告垙鍚姩
+     *
+     * @param args 鍙傛暟
+     */
+    public static void main(String[] args) {
+<span class="nc" id="L626">        PApplet.main(&quot;gremlins.App&quot;);</span>
+<span class="nc" id="L627">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
